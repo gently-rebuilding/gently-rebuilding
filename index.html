@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gently.rebuilding — with Dawn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1512;
+    --bg2: #221e1a;
+    --bg3: #2a2420;
+    --rose: #c9857a;
+    --rose-light: #e8b4ae;
+    --rose-dim: rgba(201,133,122,0.15);
+    --rose-border: rgba(201,133,122,0.25);
+    --sand: #c4a882;
+    --sand-dim: rgba(196,168,130,0.12);
+    --sage: #8a9e8c;
+    --text: #f0ebe4;
+    --text-mid: #b8afa6;
+    --text-soft: #7a7068;
+    --border: rgba(240,235,228,0.08);
+    --border-hover: rgba(201,133,122,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1.25rem 5rem;
+  }
+
+  /* subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: .4;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bg3) 0%, #3a2e28 100%);
+    border: 1.5px solid var(--rose-border);
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--rose-light);
+    letter-spacing: -.02em;
+  }
+
+  .handle {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 10px;
+  }
+
+  .name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .name em {
+    font-style: italic;
+    color: var(--rose-light);
+  }
+
+  .bio {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.65;
+    font-weight: 300;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2rem 0 1.5rem;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--rose);
+    opacity: .5;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  /* LINKS */
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+
+  .link-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all .2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--rose-dim);
+    opacity: 0;
+    transition: opacity .2s;
+    border-radius: 14px;
+  }
+
+  .link-btn:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+  }
+
+  .link-btn:hover::before { opacity: 1; }
+
+  .link-btn.featured {
+    background: var(--rose-dim);
+    border-color: var(--rose-border);
+  }
+
+  .link-btn.featured:hover {
+    border-color: var(--rose);
+  }
+
+  .link-btn.coming-soon {
+    opacity: .55;
+    cursor: default;
+  }
+  .link-btn.coming-soon:hover {
+    transform: none;
+    border-color: var(--border);
+  }
+  .link-btn.coming-soon::before { display: none; }
+
+  .link-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .icon-healf { background: rgba(196,168,130,0.15); }
+  .icon-ig { background: rgba(201,133,122,0.15); }
+  .icon-tt { background: rgba(240,235,228,0.06); }
+  .icon-yt { background: rgba(201,133,122,0.12); }
+  .icon-med { background: rgba(138,158,140,0.15); }
+  .icon-mail { background: rgba(240,235,228,0.06); }
+
+  .link-body {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .link-sub {
+    font-size: 12px;
+    color: var(--text-soft);
+    font-weight: 300;
+  }
+
+  .link-badge {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .badge-new {
+    background: var(--rose-dim);
+    color: var(--rose-light);
+    border: 1px solid var(--rose-border);
+  }
+
+  .badge-soon {
+    background: rgba(240,235,228,0.05);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+  }
+
+  /* SOCIAL ROW */
+  .socials {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+
+  .social-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--text-mid);
+    font-size: 12px;
+    font-weight: 400;
+    transition: all .2s;
+    cursor: pointer;
+  }
+
+  .social-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
+
+  .social-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  .footer-name {
+    font-family: 'Playfair Display', serif;
+    font-size: .85rem;
+    font-style: italic;
+    color: var(--text-soft);
+    margin-bottom: 4px;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text-soft);
+    opacity: .5;
+    font-weight: 300;
+  }
+
+  /* SVG icons */
+  .svg-icon { width: 18px; height: 18px; display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="avatar">d</div>
+    <div class="handle">@gently.rebuilding</div>
+    <h1 class="name">Gently <em>Rebuilding</em><br>with Dawn</h1>
+    <p class="bio">For women coming back to themselves. Self care, wellness and finding your peace.</p>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-dot"></div>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="section-label">As seen with:</div>
+  <div class="links">
+    <a href="YOUR_HEALF_LINK_HERE" class="link-btn featured" target="_blank" rel="noopener">
+      <div class="link-icon icon-healf">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9z" stroke="#c4a882" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M8 12h8M12 8v8" stroke="#c4a882" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="link-body">
+        <div class="link-title">Shop Healf — my wellness picks</div>
+        <div class="link-sub">Use my code for a discount</div>
+      </div>
+      <span class="link-badge badge-new">Partner</span>
+    </a>
+  </div>
+
+  <div class="section-label">Find me</div>
+  <div class="socials">
+    <a href="https://instagram.com/gently.rebuilding" class="social-btn" target="_blank" rel="noopener">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+        <rect x="2" y="2" width="20" height="20" rx="6" stroke="#c9857a" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="4" stroke="#c9857a" stroke-width="1.5"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="#c9857a"/>
+      </svg>
+      <span>Instagram</span>
+    </a>
+    <a href="https://tiktok.com/@gently.rebuilding" class="social-btn" target="_blank" rel="noopener">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" stroke="#f0ebe4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>TikTok</span>
+    </a>
+    <a href="https://youtube.com/@gently.rebuilding" class="social-btn" target="_blank" rel="noopener">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+        <rect x="2" y="5" width="20" height="14" rx="4" stroke="#c9857a" stroke-width="1.5"/>
+        <path d="M10 9l5 3-5 3V9z" fill="#c9857a"/>
+      </svg>
+      <span>YouTube</span>
+    </a>
+  </div>
+
+  <div class="section-label">Work with me</div>
+  <div class="links">
+    <a href="#" class="link-btn coming-soon">
+      <div class="link-icon icon-med">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3c-1.5 3-5 4-5 8a5 5 0 0 0 10 0c0-4-3.5-5-5-8z" stroke="#8a9e8c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 17c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke="#8a9e8c" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="link-body">
+        <div class="link-title">The Breakup Meditations</div>
+        <div class="link-sub">A 12-part audio healing series — by Dawn Moss</div>
+      </div>
+      <span class="link-badge badge-soon">Coming soon</span>
+    </a>
+    <a href="/cdn-cgi/l/email-protection#e9818c858586a98e8c879d85909b8c8b9c80858d80878ec78a8684" class="link-btn">
+      <div class="link-icon icon-mail">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="5" width="20" height="14" rx="3" stroke="#7a7068" stroke-width="1.5"/>
+          <path d="M2 8l10 7 10-7" stroke="#7a7068" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="link-body">
+        <div class="link-title">Get in touch</div>
+        <div class="link-sub">Collabs, partnerships, press</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">
+    <div class="footer-name">Dawn Moss</div>
+    <div class="footer-note">gently.rebuilding — coming back to yourself, softly</div>
+  </div>
+</div>
+</body>
+</html>
